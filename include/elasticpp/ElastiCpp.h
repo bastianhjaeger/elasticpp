@@ -7,7 +7,10 @@ namespace elasticpp {
 class ElastiCpp {
   friend class ElastiCppTest;
 public:
-  ElastiCpp(const std::string& _baseUrl, const std::string& _credentials = "");
+  ElastiCpp(const std::string& _baseUrl,
+      const std::string& _credentials = "",
+      const std::string& _caCertFilepath = "",
+      const std::string& _caPass = "");
   ~ElastiCpp();
 
   bool createIndex(const std::string& _index, int _shards = 1, int _replicas = 1, int _verbose = 0) const;
@@ -20,6 +23,8 @@ public:
 private:
   const std::string baseUrl_; // e.g. "http://mydomain.com:9200/"
   const std::string credentials_; // e.g. "elastic:awesomepassword"
+  const std::string caCertFilepath_; // e.g. /home/elasticsearch/elasticsearch-ca.pem
+  const std::string caPass_; // e.g. "awesomepassword"
 };
 
 } // namespace elasticpp

@@ -11,7 +11,9 @@ size_t curl_write_callback(void *ptr, size_t size, size_t nmemb, std::string* da
   return size * nmemb;
 }
 
-void elastic_cpp_curl_init(const std::string& _credentials) {
+void elastic_cpp_curl_init(const std::string& _credentials,
+                           const std::string& _caCertFilepath,
+                           const std::string& _caPass) {
   if ( !curl ) {
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -24,6 +26,20 @@ void elastic_cpp_curl_init(const std::string& _credentials) {
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+
+
+    if ( _caCertFilepath != "" ) {
+      std::ifstream ifs(_caCertFilepath);
+      std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                           (std::istreambuf_iterator<char>()    ) );
+
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+      curl_easy_setopt(curl, CURLOPT_CAINFO, content.c_str());
+    }
+
+    if ( _caPass != "" ) {
+      curl_easy_setopt(curl, CURLOPT_TLSAUTH_PASSWORD, _caPass);
+    }
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_callback);
 
@@ -38,11 +54,15 @@ void elastic_cpp_curl_cleanup() {
   }
 }
 
-std::string elastic_cpp(const std::string& _url, const std::string& _credentials, const std::string& _message,
-    ELASTICPP_CURL_CMD _cmdType, bool _singleCall, int _verbose) {
+std::string elastic_cpp(const std::string& _url,
+                        const std::string& _credentials,
+                        const std::string& _caCertFilepath,
+                        const std::string& _caPass,
+                        const std::string& _message,
+                        ELASTICPP_CURL_CMD _cmdType, bool _singleCall, int _verbose) {
   std::string message = _message;
 
-  elastic_cpp_curl_init(_credentials);
+  elastic_cpp_curl_init(_credentials, _caCertFilepath, _caPass);
 
   if ( curl ) {
     curl_easy_setopt(curl, CURLOPT_URL,_url.c_str());
@@ -108,15 +128,19 @@ std::string elastic_cpp(const std::string& _url, const std::string& _credentials
   return "";
 }
 
-json elastic_cpp(const std::string& _url, const std::string& _credentials, const json& _message,
-    ELASTICPP_CURL_CMD _cmdType, bool _singleCall, int _verbose) {
+json elastic_cpp(const std::string& _url,
+                 const std::string& _credentials,
+                 const std::string& _caCertFilepath,
+                 const std::string& _caPass,
+                 const json& _message,
+                 ELASTICPP_CURL_CMD _cmdType, bool _singleCall, int _verbose) {
   std::string message = "";
 
   if ( !_message.empty() ) {
     message = _message.dump();
   }
 
-  const std::string response = elastic_cpp(_url, _credentials, message, _cmdType, _singleCall, _verbose);
+  const std::string response = elastic_cpp(_url, _credentials, _caCertFilepath, _caPass, message, _cmdType, _singleCall, _verbose);
 
   if ( response.empty() ) {
     return json();

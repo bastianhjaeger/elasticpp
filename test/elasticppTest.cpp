@@ -15,9 +15,9 @@ TEST(elasticppTest, elasticCpp_noHost) {
   json jResponse;
   std::string sResponse;
 
-  EXPECT_NO_THROW( jResponse = elastic_cpp("", "", json(),
+  EXPECT_NO_THROW( jResponse = elastic_cpp("", "", "", "", json(),
       POST, true, false) );
-  EXPECT_NO_THROW( sResponse = elastic_cpp("", "", std::string(),
+  EXPECT_NO_THROW( sResponse = elastic_cpp("", "", "", "", std::string(),
       POST, true, false) );
 
   std::cout << jResponse.dump(3) << std::endl;
@@ -28,9 +28,9 @@ TEST(elasticppTest, elasticCpp_wrongHost) {
   json jResponse;
   std::string sResponse;
 
-  EXPECT_NO_THROW( jResponse = elastic_cpp("http://localhostFoo:1234/test", "", json(),
+  EXPECT_NO_THROW( jResponse = elastic_cpp("http://localhostFoo:1234/test", "", "", "", json(),
       POST, true, false) );
-  EXPECT_NO_THROW( sResponse = elastic_cpp("http://localhostFoo:1234/test", "", std::string(),
+  EXPECT_NO_THROW( sResponse = elastic_cpp("http://localhostFoo:1234/test", "", "", "", std::string(),
       POST, true, false) );
 
   std::cout << jResponse.dump(3) << std::endl;
@@ -42,9 +42,9 @@ TEST(elasticppTest, elasticCpp_justHostNoCredNoMessage) {
   json jResponse;
   std::string sResponse;
 
-  EXPECT_NO_THROW( jResponse = elastic_cpp(TEST_URI, "", json(),
+  EXPECT_NO_THROW( jResponse = elastic_cpp(TEST_URI, "", "", "", json(),
       POST, true, false) );
-  EXPECT_NO_THROW( jResponse = elastic_cpp(TEST_URI, "", std::string(),
+  EXPECT_NO_THROW( jResponse = elastic_cpp(TEST_URI, "", "", "", std::string(),
       POST, true, false) );
 
   std::cout << jResponse.dump(3) << std::endl;
@@ -58,9 +58,9 @@ TEST(elasticppTest, elasticCpp_Timing) {
 
   const std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
   for ( int i = 0; i< 10; ++i ) {
-    const json jResponse =        elastic_cpp(TEST_URI + url, TEST_CRED, json(),          POST, false, verbose);
+    const json jResponse =        elastic_cpp(TEST_URI + url, TEST_CRED, "", "", json(),          POST, false, verbose);
     std::cout << "jResponse: " << jResponse.dump(3) << std::endl;
-    const std::string sResponse = elastic_cpp(TEST_URI + url, TEST_CRED, std::string(""), POST, false, verbose);
+    const std::string sResponse = elastic_cpp(TEST_URI + url, TEST_CRED, "", "", std::string(""), POST, false, verbose);
     std::cout << "sResponse: " << json::parse(sResponse).dump(3) << std::endl;
   }
   const std::chrono::time_point<std::chrono::system_clock> stop = std::chrono::system_clock::now();
@@ -98,14 +98,14 @@ TEST(elasticppTest, elasticCpp_Aggregation) {
   \"size\": 0 \
 }"_json;
 
-  json response = elastic_cpp(TEST_URI + url, TEST_CRED, avgIaq, POST, verbose);
+  json response = elastic_cpp(TEST_URI + url, TEST_CRED, "", "", avgIaq, POST, verbose);
   std::cout << "response: " << response.dump(3) << std::endl;
 }
 
 TEST(elasticppTest, elasticCpp_CreateIndex) {
   const std::string url = "some-index-1";
 
-  const json response = elastic_cpp(TEST_URI + url, TEST_CRED, json(), PUT);
+  const json response = elastic_cpp(TEST_URI + url, TEST_CRED, "", "", json(), PUT);
 
   std::cout << "response: " << response.dump(3) << std::endl;
 }
@@ -113,7 +113,7 @@ TEST(elasticppTest, elasticCpp_CreateIndex) {
 TEST(elasticppTest, elasticCpp_DeleteIndex) {
   const std::string url = "some-index-1";
 
-  const json response = elastic_cpp(TEST_URI + url, TEST_CRED, json(), DELETE);
+  const json response = elastic_cpp(TEST_URI + url, TEST_CRED, "", "", json(), DELETE);
 
   std::cout << "response: " << response.dump(3) << std::endl;
 }
