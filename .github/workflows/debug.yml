@@ -1,0 +1,35 @@
+name: ElastiCpp-Debug
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure sysctl limits for Elasticsearch
+      run: |
+        sudo swapoff -a
+        sudo sysctl -w vm.swappiness=1
+        sudo sysctl -w fs.file-max=262144
+        sudo sysctl -w vm.max_map_count=262144
+    - name: Runs Elasticsearch
+      uses: elastic/elastic-github-actions/elasticsearch@master
+      with:
+        stack-version: 7.6.0
+    - name: Install other dependencies
+      run: sudo apt-get install libcurl4-openssl-dev
+    - name: Install gtest manually
+      run: sudo apt-get install libgtest-dev && ELASTIC_BUILD_DIR=$(pwd) && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp *.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+    - name: Return to build dir
+      run: cd $ELASTIC_BUILD_DIR	
+    - uses: actions/checkout@v1
+    - name: configure
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-Werror" ..
+    - name: make
+      run: cd build && make
+    - name: Run Test
+      run: /home/runner/work/elasticpp/elasticpp/build/test/elasticpp.test
